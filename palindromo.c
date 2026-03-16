@@ -3,7 +3,7 @@
 
 struct deque_nodo
 {
-	char item;					// item associado ao nodo
+	char *item;					// item associado ao nodo
 	struct deque_nodo *prox;	// próximo nodo
     struct deque_nodo *ant;
 };
@@ -34,7 +34,7 @@ struct deque *deque_destroi (struct deque *d)
   if(d == NULL)
     return NULL;
 
-  struct deque_nodo *n = f->prim;
+  struct deque_nodo *n = d->prim;
   struct deque_nodo *aux; 
   while(n != NULL)
   {
@@ -46,7 +46,7 @@ struct deque *deque_destroi (struct deque *d)
   return NULL;
 }
 
-int deque_insere_final (struct deque *f, char item)
+int deque_insere_final (struct deque *d, char *item)
 {
   if (d == NULL)
     return 0;
@@ -64,7 +64,7 @@ int deque_insere_final (struct deque *f, char item)
     d->prim = n;
     d->ult = n;
     d->cursor = d->prim;
-    (f->num)++;
+    (d->num)++;
     return 1;
   }
 
@@ -76,7 +76,7 @@ int deque_insere_final (struct deque *f, char item)
   return 1;
 }
 
-int deque_insere_inicio (struct deque *f, char item)
+int deque_insere_inicio (struct deque *d, char *item)
 {
   if (d == NULL)
     return 0;
@@ -93,7 +93,7 @@ int deque_insere_inicio (struct deque *f, char item)
     d->prim = n;
     d->ult = n;
     d->cursor = d->prim;
-    (f->num)++;
+    (d->num)++;
     return 1;
   }
 
@@ -135,7 +135,7 @@ int deque_retira_final (struct deque *d, char *item)
   struct deque_nodo *n = d->ult;
 
   d->ult = n->ant;
-  (d->ult)->prox = NULL
+  (d->ult)->prox = NULL;
   (d->num)--;
   *item = n->item;
   free(n);
@@ -152,7 +152,7 @@ void deque_imprime (struct deque *d)
   
   while(n != d->ult)
   {
-    printf("%d ", n->item);
+    printf("%s ", n->item);
     n = n->prox;
   }
   printf("%d", n->item);
@@ -165,14 +165,6 @@ int deque_tamanho (struct deque *d)
   if (d == NULL)
     return -1;
   return d->num;
-}
-
-void next (struct deque *d)
-{
-  if(d == NULL || d->num == 0)
-    return;
-
-  d->cursor = (d->cursor)->prox;
 }
 
 void next (struct deque *d)
@@ -208,15 +200,4 @@ int has_prev (struct deque *d)
   else
     return 1;
 }
-
-int main ()
-{
-  struct deque *d = deque_cria;
-  char a;
-  void *item;
-  scanf("%c", a);
-  while(a != ".")
-  {
-    
-  }
-}
+  
