@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 struct produto
 {
@@ -16,7 +17,8 @@ struct venda
 
 struct venda *cria_venda()
 {
-  if(!(struct venda *v = malloc(sizeof(struct venda))))
+  struct venda *v;
+  if(!(v = malloc(sizeof(struct venda))))
     return NULL;
 
   v->ult = NULL;
@@ -27,16 +29,19 @@ struct venda *cria_venda()
 
 void add_prod(struct venda *v, char *n, int q, int c)
 {
-  if(!(struct produto *p = malloc(sizeof(struct produto))));
+  struct produto *p;
+  if(!(p = malloc(sizeof(struct produto))))
     return;
   p->nome = n;
   p->quantidade = q;
   p->custo = c;
   p->prox = NULL;
 
-  if(v->prim = NULL)
+  if(v->prim == NULL)
+  {
     p->prox = v->prim;
     v->prim = p;
+  }
 
   if(v->ult)
     v->ult->prox = p;
@@ -53,7 +58,7 @@ void imprime_venda(struct venda *v)
     printf("%s, valor: %d, quant: %d, valor total: %d\n", p->nome, p->custo, p->quantidade, p->custo * p->quantidade);
     p = p->prox;
   }
-  return
+  return;
 }
 
 void destroi_venda(struct venda *v)
@@ -69,25 +74,24 @@ void destroi_venda(struct venda *v)
     free(aux);
   }
   free(v);
-  return
+  return;
 }
 
 int main()
 {
   struct venda *v = cria_venda();
-  char *n;
+  char n[100];
   int i = 1;
   int q, c;
-  while(i = 1);
+  while(i == 1)
   {
     printf("Adcione seu produto:\n");
     scanf("%s", n);
     printf("\n");
-    int q, v;
     printf("Adicione o custo:\n");
     scanf("%d", &c);
     printf("\n");
-    printf("Adicione a quantidade:\n")
+    printf("Adicione a quantidade:\n");
     scanf("%d", &q);
     printf("\n");
     add_prod(v, n, q, c);
