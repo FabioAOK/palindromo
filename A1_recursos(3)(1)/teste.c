@@ -62,7 +62,7 @@ int cmp_date(const void *a, const void *b)
     return 0;
 }
 
-int gbv_create(const char *filename)
+int gbv_create(const char *filename, const char *password)
 {
   FILE *fp;
   SuperBloco sb;
@@ -77,6 +77,9 @@ int gbv_create(const char *filename)
   sb.count = 0;
   sb.dir_offset = sizeof(SuperBloco);
 
+  strncpy(sb.password, password, 63);
+  sb.password[63] = '\0';
+
   if(fwrite(&sb, sizeof(SuperBloco), 1, fp) != 1) 
   {
     fclose(fp);
@@ -87,8 +90,14 @@ int gbv_create(const char *filename)
   return 0;
 }
 
-int gbv_open(Library *lib, const char *filename)
+int gbv_open(Library *lib, const char *filename, const char *password)
 {
+  if(strcmp(sb.password, password) != 0)
+  {
+    fclose(fp);
+    return 1;
+  }
+  
   FILE *fp;
   SuperBloco sb;
 
@@ -429,4 +438,96 @@ int gbv_order(Library *lib, const char *archive, const char *criteria)
 
   fclose(fp);
   return 0;
+}
+
+int gbv_rename(Library *lib, const char *oldname, const char *newname)
+{
+  FILE *fp;
+  SuperBloco sb;
+  int pos, pos2;
+
+  if(!lib || !oldname || !newname)
+    return 1;
+
+  pos = find_doc(lib, oldname);
+  if(pos == -1)
+    return 1;
+
+  pos2 = find_doc(lib, newname);
+  if(pos2 != -1)
+    return 1;
+
+  strncpy(lib->docs[pos].name, newname, MAX_NAME-1);
+  lib->docs[pos].name[MAX_NAME - 1] = '\0';
+
+  fp = fopen(current_library, "rb+");
+  if(!fp)
+    return 1;
+
+  fseek(fp, 0, SEEK_END);
+  sb.count = lib->count;
+  sb.dir_offset = ftell(fp);
+
+  if(lib->count > 0) 
+  {
+    if(fwrite(lib->docs, sizeof(Document), lib->count, fp) != (size_t)lib->count) 
+    {
+      fclose(fp);
+      return 1;
+    }
+  }
+
+  fseek(fp, 0, SEEK_SET);
+  if(fwrite(&sb, sizeof(SuperBloco), 1, fp) != 1) 
+  {
+    fclose(fp);
+    return 1;
+  }
+
+  fclose(fp);
+  return 0;
+}
+
+int gbv_extract(const Library *lib, const char *docname, const char *output)
+{
+  FILE *fp, exit;
+  SuperBloco sb;
+  int pos, size;
+
+  if(!lib || !docname || !output)
+    return 1;
+
+  pos = find_doc(lib, docname);
+  if(pos == -1)
+    return 1;
+
+  fp = fopen(current_library, "rb");
+  if(!fp)
+    return 1;
+
+  exit = fopen(output, "wb");
+  if(!exit)
+  {
+    fclose(fp);
+    return 1;
+  }
+
+  fseek(fp, lib->docs[pos].offset, SEEK_SET);
+  size = ftell(fp);
+
+  while ((nread = fread(buffer, 1, BUFFER_SIZE, fp)) > 0) 
+  {
+    if(fwrite(buffer, 1, nread, exit) != nread) 
+    {
+      fclose(fp);
+      fclose(exit);
+      return 1;
+    }
+  }
+
+  fclose(fp);
+  fclose(exit);
+  return 0;
+
+  
 }
